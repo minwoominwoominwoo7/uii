@@ -1,0 +1,38 @@
+https://github.com/kimbring2/DeepSoccer?fbclid=IwAR1OvJEm2lTDaE4yNZBJjRgWjJoAxetUalDkrsTMLNpDOVSDocojch-vLy8
+DeepSoccer
+
+https://forums.developer.nvidia.com/t/jetson-nano-can-play-soccer/108423?fbclid=IwAR2qjibZ0lnR9C6Mr7eMADWSjjAswOWmLZvpt4cgQaLlfwSSbFSv5hrUBgQ
+
+https://kimbring2.github.io/2019/10/26/jetbot.html?fbclid=IwAR0LZYN0N1DJdxWe1X_GPmjPtYrH4w2xybJWRbmwyLUrI5SXkmG8Uyppy2Y
+
+
+home/kimbring2/catkin_ws/src/jetbot
+home/minwoo/catkin_ws/src/DeepSoccer/jetbot
+
+find . -name "*.ipynb"
+
+
+sudo apt install jupyter-notebook
+jupyter-notebook
+
+#파이썬 가상 환경 
+https://wordbe.tistory.com/entry/ubuntu-python-virtualenv-%EC%84%A4%EC%A0%95
+$ python -m virtualenv venv-python2.7 
+$ python3 -m virtualenv venv-python3.6
+venv-python2.7$ source bin/activate
+deactivate
+source bin/activate
+https://www.tensorflow.org/install/pip
+
+
+sudo pip install cvlib==0.2.5
+sudo pip install imageio==2.6.1
+sudo pip install tensorflow==2.1.0
+
+sudo pip install requests
+sudo pip install progressbar
+sudo pip install keras
+sudo pip install opencv-python
+
+sudo apt-get update upgrade
+sudo apt-get upgrade
