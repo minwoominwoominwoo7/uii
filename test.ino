@@ -1,85 +1,18 @@
-#define USE_ARDUINO_INTERRUPTS true
-//#include <PulseSensorPlayground.h>
-#include <ros.h>
-#include <ros/time.h>
-#include <std_msgs/UInt16.h>
-#include <sensor_msgs/Range.h>
-//#include <SoftwareSerial.h>
+두개차이를 살펴 봤는데 설명하지니 좀 길어지네요 ..;;;  
+일단 겉보기로는
+기존 waypoint_follower는 목적지를 여러개 지정해주고 도착할때마다 도착하고 멈춤 하고 다음 출발 이런 식인데요.
+이건 멈춤없이 해당 포인트들은 그냥 global path 경우지 처럼 거처 지나가는 것처럼 동작하는 것 같습니다.  
 
+그런데 이게 코드 내부를 보면;;; 구현 방식이 완전히 틀린것 같습니다.  
+waypoint_follower는 별도의 plubin 형태로 제작을 해서
+https://github.com/ros-planning/navigation2/tree/navigate_through_poses/nav2_waypoint_follower
+해당 플러그인을 호출하면 알아서 navigate_to_pose 액션을 앞에 액션이 성공한후 순차적으로 반복적으로 호출해 주는 형식이거든요.
+그러니까 navigation 전체사이클에 해당하는 behavior tree가 사실상 찍은 골 포인트만큼 반복적으로 도는거고 당연히 목적기 골에 도착하는 중간중간 마다 멈춤이 나올수 밖에 없는형태고요.
 
-
-//PulseSensorPlayground pulseSensor; // Creates an instance of the PulseSensorPlayground object called "pulseSensor"
-//SoftwareSerial BTSerial(3,2);
-void heart_cb( const std_msgs::UInt16& cmd_msg);
-
-const int PulseWire = 1;
-const int LED13 = 13;
-int Threshold = 550;
-
-int lof_pin = 10;
-int rof_pin = 11;
-int sound_pin = 9;
-int led_pin = 8;
-int beat_pulse = 0;
-int threshold = 500;
-std_msgs::UInt16 msg;
-
-ros::NodeHandle nh;
-sensor_msgs::Range range_msg;
-ros::Publisher pub_range( "/ecg", &range_msg);
-ros::Subscriber<std_msgs::UInt16> sub("/heartrate", heart_cb);
-
-void heart_cb( const std_msgs::UInt16& cmd_msg)
-{
-msg = cmd_msg;
-}
-
-void setup() {
-
-nh.initNode();
-nh.advertise(pub_range);
-// initialize the serial communication:
-//Serial.begin(9600);
-//BTSerial.begin(9600);
-pinMode(lof_pin, INPUT); // Setup for leads off detection LO +
-pinMode(rof_pin, INPUT); // Setup for leads off detection LO -
-pinMode(sound_pin, OUTPUT);
-pinMode(led_pin, OUTPUT);
-
-//pulseSensor.analogInput(PulseWire);
-//pulseSensor.blinkOnPulse(LED13); //auto-magically blink Arduino's LED with heartbeat.
-//pulseSensor.setThreshold(Threshold);
-
-// Double-check the "pulseSensor" object was created and "began" seeing a signal.
-//if (pulseSensor.begin()) {
-//Serial.println("We created a pulseSensor Object !"); //This prints one time at Arduino power-up, or on Arduino reset.
-//}
-}
-
-
-void loop() {
-
-//read sensor value and publish
-range_msg.range = analogRead(A0);
-pub_range.publish( &range_msg );
-
-if ((digitalRead(lof_pin) == 1) || (digitalRead(rof_pin) == 1)) {
-//Serial.println('!');
-}
-else {
-// send the value of analog input 0:
-if (beat_pulse >= threshold) {
-digitalWrite(sound_pin, HIGH);
-digitalWrite(led_pin, HIGH);
-}
-else {
-digitalWrite(sound_pin, LOW);
-digitalWrite(led_pin, LOW);
-}
-}
-
-if(msg.data == 0) {
-//BTSerial.println("위험:심장박동이 정지되었습니다");
-}
-nh.spinOnce();
-}
+그런데 이번에 새로 추가된것 같은 깃 푸쉬된지 24시간도 안된것 같습니다. ;;;;;
+Navigate Through Poses 의 경우는 골을 여러번 찍어도 navigate_to_pose 액션은 한번만 호출하고  
+navigate_to_pose 액션 실행시 호출되는 behavior tree xml를 수정한 방식인것 같습니다
+https://github.com/ros-planning/navigation2/blob/navigate_through_poses/nav2_bt_navigator/behavior_trees/navigate_through_poses_w_replanning_and_recovery.xml
+behavior tree에 RemovePassedGoals 라는 behavior tree action 을 추가해서 global path 도착이 성공하면 navigation  한사이클이 끝나는게 아니고 다음 global path 를 바로 생성해서 바로 이어서 따라가게 하는것 같네요 흠..
+돌려보지는 Navigate Through Poses가 nav2 의 장점인 behavior tree 를 잘 활용한거 같긴하네요
+일단 기본 기능이 점점 추가 되니까 좋긴 하네요  
