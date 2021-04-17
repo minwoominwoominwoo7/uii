@@ -1,0 +1,49 @@
+[Unit]
+Description="Flask web server___________"
+After=network.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+#User=root
+User=minwoo
+#Group=root
+Group=minwoo
+#PermissionsStartOnly=true
+Type=simple
+ExecStart=/home/minwoo/test3.sh
+#WorkingDirectory=/home/kibua20/git/getgoogle/server
+#TimeoutSec=600
+#Restart=on-failure
+#Restart=no
+#RuntimeDirectoryMode=777
+
+
+
+#!/bin/bash
+# THIS IS A GENERATED FILE, NOT RECOMMENDED TO EDIT.
+
+function log() {
+  logger -s -p user.$1 ${@:2}
+}
+
+log info "test: Using workspace setup file /home/minwoo/catkin_ws/devel/setup.bash"
+source /opt/ros/foxy/setup.bash
+source /home/minwoo/nav2_ws/install/local_setup.bash
+
+export ROS_HOSTNAME=$(hostname)
+export ROS_MASTER_URI=http://127.0.0.1:11311
+export ROS_HOME=${ROS_HOME:=$(echo ~minwoo)/.ros}
+export ROS_LOG_DIR=$log_path
+export TURTLEBOT3_MODEL=waffle
+export ROS_DOMAIN_ID=87
+
+log info "test: Launching ROS_HOSTNAME=$ROS_HOSTNAME, ROS_IP=$ROS_IP, ROS_MASTER_URI=$ROS_MASTER_URI, ROS_HOME=$ROS_HOME, ROS_LOG_DIR=$log_path"
+ros2 launch /home/minwoo/nav2_ws/src/turtlebot3/turtlebot3_bringup/launch/turtlebot3_state_publisher.launch.py &
+PID=$!
+
+log info "test: Started roslaunch as background process, PID $PID, ROS_LOG_DIR=$ROS_LOG_DIR"
+echo "$PID" > $log_path/test.pid
+
+wait "$PID"
